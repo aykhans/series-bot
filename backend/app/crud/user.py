@@ -1,4 +1,3 @@
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session, joinedload
@@ -11,10 +10,43 @@ from app.core.security import (
 from app.crud import async_crud_notification_settings
 from app.crud.base import AsyncCRUDBase
 from app.models import User
-from app.schemas import UserCreate, UserUpdate
+from app.schemas import UserCreate, UserFilter, UserUpdate
 
 
 class AsyncCRUDUser(AsyncCRUDBase[User, UserCreate, UserUpdate]):
+    async def _get_filters(
+        self,
+        user_filter: UserFilter
+    ) -> list:
+        filters = []
+        if user_filter.username is not None:
+            filters.append(
+                self.model.username.ilike(f"%{user_filter.username}%")
+            )
+        if user_filter.email is not None:
+            filters.append(self.model.email.ilike(f"%{user_filter.email}%"))
+        if user_filter.is_email_verified is not None:
+            filters.append(
+                self.model.is_email_verified.is_(
+                    user_filter.is_email_verified
+                )
+            )
+        if user_filter.is_active is not None:
+            filters.append(self.model.is_active.is_(user_filter.is_active))
+        if user_filter.is_superuser is not None:
+            filters.append(
+                self.model.is_superuser.is_(user_filter.is_superuser)
+            )
+        if user_filter.created_at_start is not None:
+            filters.append(
+                self.model.created_at >= user_filter.created_at_start
+            )
+        if user_filter.created_at_end is not None:
+            filters.append(
+                self.model.created_at <= user_filter.created_at_end
+            )
+        return filters
+
     async def create(self, db: AsyncSession, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
