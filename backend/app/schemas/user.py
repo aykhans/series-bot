@@ -67,3 +67,12 @@ class UserExtended(UserInDBBase):
 class UserList(BaseModel):
     users: list[User]
     pagination: Pagination
+
+
+class UserFilter(UserBase):
+    email: Optional[str] = Field(max_length=72, default=None)
+    is_email_verified: Optional[bool] = None
+    is_active: Optional[bool] = None
+    is_superuser: Optional[bool] = None
+    created_at_start: Optional[PastDatetime] = None
+    created_at_end: Optional[PastDatetime] = None
