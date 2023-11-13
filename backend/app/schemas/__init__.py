@@ -14,6 +14,7 @@ from .user import (
     UserCreate,
     UserCreateCommand,
     UserExtended,
+    UserFilter,
     UserInDBBase,
     UserList,
     UserUpdate,

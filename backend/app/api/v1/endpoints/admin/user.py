@@ -90,17 +90,18 @@ async def update_user(
 
 @router.get('/all')
 async def get_all_users(
-    pagination: schemas.UserPagination = Depends(),
     current_user: models.User = Depends(get_current_active_superuser),
+    pagination: schemas.UserPagination = Depends(),
+    user_filter: schemas.UserFilter = Depends(),
     db: AsyncSession = Depends(get_async_db)
 ) -> schemas.UserList:
-
     users = async_crud_user.get_multi(
         db,
         skip=pagination.skip,
-        limit=pagination.page_size
+        limit=pagination.page_size,
+        filters=user_filter
     )
-    count = async_crud_user.get_count(db)
+    count = async_crud_user.get_count(db, filters=user_filter)
 
     return schemas.UserList(
         users=await users,

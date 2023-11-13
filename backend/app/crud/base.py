@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, Optional, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -12,6 +12,7 @@ from app.db.base_class import Base
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+FilterSchemaType = TypeVar("FilterSchemaType", bound=BaseModel)
 
 
 class AsyncCRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
@@ -26,6 +27,15 @@ class AsyncCRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
+    async def _get_filters(
+        self,
+        filters: FilterSchemaType
+    ) -> list:
+        raise NotImplementedError(
+            f"Method `_get_filters`"\
+                f"not implemented for `{self.__class__.__name__}`"
+        )
+
     async def get_by_uuid(
         self,
         db: AsyncSession,
@@ -36,22 +46,32 @@ class AsyncCRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return obj.scalar_one_or_none()
 
     async def get_multi(
-        self, db: AsyncSession, *, skip: int = 0, limit: int = 100
-    ) -> List[ModelType]:
-
+        self,
+        db: AsyncSession,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        filters: Optional[FilterSchemaType] = None
+    ) -> list[ModelType]:
+        q = select(self.model)
+        if filters is not None:
+            q = q.where(*await self._get_filters(filters))
         q = (
-            select(self.model).
+            q.
             offset(skip).
             limit(limit).
             order_by(self.model.created_at.desc())
         )
+
         obj = await db.execute(q)
         return obj.scalars()
 
     async def get_count(
-        self, db: AsyncSession
+        self, db: AsyncSession, *, filters: Optional[FilterSchemaType] = None
     ) -> int:
         q = select(func.count(self.model.uuid))
+        if filters is not None:
+            q = q.where(*await self._get_filters(filters))
         obj = await db.execute(q)
         return obj.scalar_one()
 
