@@ -107,3 +107,9 @@ async def get_all_users(
         users=await users,
         pagination=schemas.Pagination(total=await count)
     )
+
+@router.get('/me')
+async def get_me(
+    current_user: models.User = Depends(get_current_active_superuser),
+) -> schemas.UserExtended:
+    return current_user
