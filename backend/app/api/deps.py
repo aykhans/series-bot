@@ -27,9 +27,11 @@ def get_db() -> Generator:
     with SessionLocal() as db:
         yield db
 
+
 async def get_async_db() -> Generator:
     async with AsyncSessionLocal() as async_db:
         yield async_db
+
 
 async def get_current_user(
     db: AsyncSession = Depends(get_async_db),

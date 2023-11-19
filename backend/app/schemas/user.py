@@ -1,78 +1,116 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import UUID4, BaseModel, EmailStr, Field, PastDatetime
+from pydantic import BaseModel, EmailStr, Field, PastDatetime
 
-from app.schemas.notification_settings import (
-    NotificationSettings,
-    NotificationSettingsUpdate,
-)
-from app.schemas.pagination import Pagination
+from app.schemas import base, pagination
+from app.schemas import notification_settings as notification_schemas
 
-
-class UserBase(BaseModel):
-    username: Optional[str] = Field(
+# Custom fields
+Username = Annotated[
+    str,
+    Field(
         min_length=1,
         max_length=35,
         pattern=r'^[a-zA-Z0-9_-]+$',
-        default=None,
         examples=['JohnDoe', 'johndoe0', 'john_doe', 'john-doe']
     )
-    email: Optional[EmailStr] = Field(max_length=72, default=None)
-    is_email_verified: Optional[bool] = False
-    is_active: Optional[bool] = True
-    is_superuser: bool = False
+]
+Email = Annotated[
+    EmailStr,
+    Field(max_length=72, examples=['john@gmail.com']),
+]
+Password = Annotated[
+    str,
+    Field(min_length=8, max_length=72)
+]
+IsEmailVerified = Annotated[
+    bool,
+    Field(default=False)
+]
+IsActive = Annotated[
+    bool,
+    Field(default=True)
+]
+IsSuperuser = Annotated[
+    bool,
+    Field(default=False)
+]
 
-# Properties to receive via API on creation
-class UserCreate(UserBase):
-    username: str = Field(
-        min_length=1,
-        max_length=35,
-        pattern=r'^[a-zA-Z0-9_-]+$'
-    )
-    password: str = Field(min_length=8, max_length=72)
+
+class UserCreate(BaseModel):
+    username: Username
+    password: Password
+    email: Optional[Email] = None
 
 
-# Properties to receive via API on creation
-class UserUpdate(UserBase):
-    password: Optional[str] = None
-    notification_settings: Optional[NotificationSettingsUpdate] = None
+class UserCreateAdmin(UserCreate):
+    is_email_verified: Optional[IsEmailVerified] = False
+    is_active: Optional[IsActive] = True
+    is_superuser: Optional[IsSuperuser] = False
 
 
-class UserCreateCommand(UserCreate):
-    username: str = Field(
-        min_length=1,
-        max_length=35,
-        pattern=r'^[a-zA-Z0-9_-]+$',
-        default=None
-    )
-    password: str = Field(min_length=8, max_length=72, default=None)
+class UserCreateCommand(UserCreateAdmin):
+    username: Optional[Username] = None
+    password: Optional[Password] = None
 
     class Config:
         validate_assignment = True
 
 
-class UserInDBBase(UserBase):
-    created_at: Optional[PastDatetime] = None
-    uuid: Optional[UUID4] = None
+class UserUpdate(BaseModel):
+    username: Optional[Username] = None
+    email: Optional[Email] = None
+    password: Optional[Password] = None
+    notification_settings: Optional[
+        notification_schemas.NotificationSettingsUpdate
+    ] = None
+
+
+class UserUpdateAdmin(UserUpdate):
+    is_email_verified: Optional[IsEmailVerified] = None
+    is_active: Optional[IsActive] = None
+    is_superuser: Optional[IsSuperuser] = None
+
+
+class User(BaseModel):
+    username: Optional[Username] = None
+    email: Optional[Email] = None
+    is_email_verified: Optional[IsEmailVerified] = False
+    is_active: Optional[IsActive] = True
+    is_superuser: Optional[IsSuperuser] = False
+    created_at: Optional[base.CreatedAt] = None
+    uuid: Optional[base.UUID4] = None
 
     class Config:
         from_attributes = True
 
-class User(UserInDBBase):
-    pass
 
-class UserExtended(UserInDBBase):
-    notification_settings: NotificationSettings
+class UserExtended(User):
+    notification_settings: Optional[
+        notification_schemas.NotificationSettings
+    ] = None
 
-class UserList(BaseModel):
+
+class UserListAdmin(BaseModel):
     users: list[User]
-    pagination: Pagination
+    pagination: pagination.Pagination
 
 
-class UserFilter(UserBase):
-    email: Optional[str] = Field(max_length=72, default=None)
-    is_email_verified: Optional[bool] = None
-    is_active: Optional[bool] = None
-    is_superuser: Optional[bool] = None
+class UserFilterAdmin(BaseModel):
+    username: Optional[str] = Field(None, min_length=1, max_length=35)
+    email: Optional[str] = Field(None, min_length=1, max_length=72)
+    is_email_verified: Optional[IsEmailVerified] = None
+    is_active: Optional[IsActive] = None
+    is_superuser: Optional[IsSuperuser] = None
     created_at_start: Optional[PastDatetime] = None
     created_at_end: Optional[PastDatetime] = None
+
+
+class UsernameResponseAdmin(BaseModel):
+    username: Username
+    uuid: base.UUID4
+
+
+class EmailResponseAdmin(BaseModel):
+    email: Email
+    uuid: base.UUID4

@@ -78,8 +78,9 @@ class AsyncCRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def create(
         self, db: AsyncSession, *, obj_in: CreateSchemaType
     ) -> ModelType:
-
+        from pprint import pprint
         obj_in_data = jsonable_encoder(obj_in)
+        pprint(obj_in_data)
         db_obj = self.model(**obj_in_data)
         db.add(db_obj)
         await db.commit()
@@ -94,7 +95,6 @@ class AsyncCRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_obj: ModelType,
         obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
-
         obj_data = jsonable_encoder(db_obj)
 
         if isinstance(obj_in, dict):

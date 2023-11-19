@@ -1,21 +1,21 @@
 from .auth import JWTPayload, JWTToken
 from .notification_settings import (
     NotificationSettings,
-    NotificationSettingsBase,
     NotificationSettingsCreate,
-    NotificationSettingsInDB,
-    NotificationSettingsInDBBase,
     NotificationSettingsUpdate,
 )
 from .pagination import Pagination, UserPagination
+from .series import Series, SeriesCreate, SeriesUpdate
 from .user import (
+    EmailResponseAdmin,
     User,
-    UserBase,
     UserCreate,
+    UserCreateAdmin,
     UserCreateCommand,
     UserExtended,
-    UserFilter,
-    UserInDBBase,
-    UserList,
+    UserFilterAdmin,
+    UserListAdmin,
+    UsernameResponseAdmin,
     UserUpdate,
+    UserUpdateAdmin,
 )

@@ -1,5 +1,6 @@
 from typing import Optional
 
+from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -19,7 +20,7 @@ class AsyncCRUDNotificationSettings(
         self,
         db: AsyncSession,
         *,
-        user_uuid: str
+        user_uuid: UUID4
     ) -> Optional[NotificationSettings]:
         q = select(self.model).where(self.model.user_uuid == user_uuid)
         obj = await db.execute(q)
@@ -30,7 +31,7 @@ class AsyncCRUDNotificationSettings(
         db: AsyncSession,
         *,
         obj_in: NotificationSettingsCreate,
-        user_uuid: str
+        user_uuid: UUID4
     ) -> NotificationSettings:
         db_obj = NotificationSettings(
             **obj_in.model_dump(),

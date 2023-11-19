@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,11 +14,10 @@ router = APIRouter()
 
 @router.post('/create')
 async def create_user(
-    user_in: schemas.UserCreate,
+    user_in: schemas.UserCreateAdmin,
     current_user: models.User = Depends(get_current_active_superuser),
     db: AsyncSession = Depends(get_async_db)
 ) -> schemas.User:
-
     user = await async_crud_user.get_by_username(
         db, username=user_in.username
     )
@@ -38,7 +39,6 @@ async def create_user(
         db,
         obj_in=user_in
     )
-
     return user
 
 
@@ -48,7 +48,6 @@ async def get_user(
     current_user: models.User = Depends(get_current_active_superuser),
     db: AsyncSession = Depends(get_async_db)
 ) -> schemas.UserExtended:
-
     user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
     if user is None:
         raise UserNotFoundException(detail=f"User not found: {user_uuid}")
@@ -62,7 +61,6 @@ async def delete_user(
     current_user: models.User = Depends(get_current_active_superuser),
     db: AsyncSession = Depends(get_async_db),
 ) -> dict[str, str]:
-
     user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
     if user is None:
         raise UserNotFoundException(detail=f"User not found: {user_uuid}")
@@ -75,11 +73,10 @@ async def delete_user(
 @router.patch('/update/{user_uuid}')
 async def update_user(
     user_uuid: UUID4,
-    user_in: schemas.UserUpdate,
+    user_in: schemas.UserUpdateAdmin,
     current_user: models.User = Depends(get_current_active_superuser),
     db: AsyncSession = Depends(get_async_db),
 ) -> schemas.UserExtended:
-
     user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
     if user is None:
         raise UserNotFoundException(detail=f"User not found: {user_uuid}")
@@ -92,9 +89,9 @@ async def update_user(
 async def get_all_users(
     current_user: models.User = Depends(get_current_active_superuser),
     pagination: schemas.UserPagination = Depends(),
-    user_filter: schemas.UserFilter = Depends(),
+    user_filter: schemas.UserFilterAdmin = Depends(),
     db: AsyncSession = Depends(get_async_db)
-) -> schemas.UserList:
+) -> schemas.UserListAdmin:
     users = async_crud_user.get_multi(
         db,
         skip=pagination.skip,
@@ -103,13 +100,45 @@ async def get_all_users(
     )
     count = async_crud_user.get_count(db, filters=user_filter)
 
-    return schemas.UserList(
+    return schemas.UserListAdmin(
         users=await users,
         pagination=schemas.Pagination(total=await count)
     )
 
+
+@router.get('/usernames')
+async def get_usernames(
+    current_user: models.User = Depends(get_current_active_superuser),
+    db: AsyncSession = Depends(get_async_db),
+    username: Annotated[str, Query(min_length=1, max_length=35)] = None,
+    size: Annotated[int, Query(ge=1, le=100)] = 20
+) -> list[schemas.UsernameResponseAdmin]:
+    users = await async_crud_user.get_multi(
+        db,
+        limit=size,
+        filters=schemas.UserFilterAdmin(username=username)
+    )
+    return users
+
+
+@router.get('/emails', response_model=list[schemas.User])
+async def get_emails(
+    current_user: models.User = Depends(get_current_active_superuser),
+    db: AsyncSession = Depends(get_async_db),
+    email: Annotated[str, Query(min_length=1, max_length=72)] = None,
+    size: Annotated[int, Query(ge=1, le=100)] = 20
+) -> list[schemas.EmailResponseAdmin]:
+    users = await async_crud_user.get_multi(
+        db,
+        limit=size,
+        filters=schemas.UserFilterAdmin(email=email)
+    )
+    return users
+
+
 @router.get('/me')
 async def get_me(
     current_user: models.User = Depends(get_current_active_superuser),
+    db: AsyncSession = Depends(get_async_db)
 ) -> schemas.UserExtended:
-    return current_user
+    return await async_crud_user.get_by_uuid(db, uuid=current_user.uuid)
