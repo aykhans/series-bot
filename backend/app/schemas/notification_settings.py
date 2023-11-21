@@ -1,29 +1,30 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import UUID4, BaseModel
+from pydantic import BaseModel, Field
 
-# API Schemas
+SendEmail = Annotated[
+    bool,
+    Field(default=False)
+]
+AutoUpdate = Annotated[
+    bool,
+    Field(default=False)
+]
+
 
 class NotificationSettingsBase(BaseModel):
-    send_email: Optional[bool] = False
-    auto_update: Optional[bool] = False
+    send_email: Optional[SendEmail] = False
+    auto_update: Optional[AutoUpdate] = False
+
 
 class NotificationSettingsCreate(NotificationSettingsBase):
     pass
 
+
 class NotificationSettingsUpdate(NotificationSettingsBase):
     pass
 
-# In DB Schemas
-
-class NotificationSettingsInDBBase(NotificationSettingsBase):
-    user_uuid: Optional[UUID4] = None
-
-    class Config:
-        from_attributes = True
 
 class NotificationSettings(NotificationSettingsBase):
-    pass
-
-class NotificationSettingsInDB(NotificationSettingsBase):
-    user_uuid: Optional[UUID4]
+    class Config:
+        from_attributes = True

@@ -21,19 +21,15 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_async_db)
 ) -> JWTToken:
-
     user = await async_crud_user.authenticate(
         db,
         username=form_data.username,
         password=form_data.password
     )
-
     if user is None:
         raise InvalidCredentialsException()
-
     elif user.is_active is False:
         raise InactiveUserException()
-
     elif user.is_superuser is False:
         raise NotSuperuserException(detail='Not a superuser')
 
