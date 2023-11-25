@@ -1,6 +1,7 @@
 from pydantic import UUID4
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.crud.base import AsyncCRUDBase
 from app.models import Series
@@ -41,5 +42,16 @@ class AsyncCRUDSeries(AsyncCRUDBase[Series, SeriesCreate, SeriesUpdate]):
         await db.commit()
         await db.refresh(db_obj)
         return db_obj
+
+    async def get_by_uuid(
+        self,
+        db: AsyncSession,
+        uuid: UUID4
+    ) -> Series:
+        q = select(self.model).where(self.model.uuid == uuid).options(
+            joinedload(self.model.user)
+        )
+        obj = await db.execute(q)
+        return obj.scalar_one_or_none()
 
 async_series = AsyncCRUDSeries(Series)
