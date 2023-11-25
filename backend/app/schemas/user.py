@@ -114,3 +114,11 @@ class UsernameResponseAdmin(BaseModel):
 class EmailResponseAdmin(BaseModel):
     email: Email
     uuid: base.UUID4
+
+class UserInSeries(BaseModel):
+    uuid: base.UUID4
+    username: Username
+    email: Optional[Email] = None
+
+    class Config:
+        from_attributes = True

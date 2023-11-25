@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "series-robot-web-v2"
+name = "series-bot"
 version = "0.1.0"
 description = ""
 authors = ["Aykhan-s"]

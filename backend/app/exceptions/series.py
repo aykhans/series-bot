@@ -13,3 +13,16 @@ class SeriesAlreadyExistsException(HTTPException):
             status_code=status_code,
             detail=detail
         )
+
+class SeriesNotFoundException(HTTPException):
+    def __init__(
+        self,
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail='Series not found',
+        *args, **kwargs
+    ):
+        super().__init__(
+            *args, **kwargs,
+            status_code=status_code,
+            detail=detail
+        )

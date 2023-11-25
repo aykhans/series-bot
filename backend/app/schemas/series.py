@@ -3,6 +3,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, Field
 
 from app.schemas import base
+from app.schemas import user as user_schemas
 
 Title = Annotated[
     str,
@@ -60,3 +61,6 @@ class Series(SeriesBase):
 
     class Config:
         from_attributes = True
+
+class SeriesExtended(Series):
+    user: Optional[user_schemas.UserInSeries] = None
