@@ -6,4 +6,4 @@ from .auth import (
     UserNotExistsException,
     UserNotFoundException,
 )
-from .series import SeriesAlreadyExistsException
+from .series import SeriesAlreadyExistsException, SeriesNotFoundException
