@@ -64,3 +64,30 @@ async def delete_series(
 ) -> dict[str, str]:
     await async_crud_series.remove_by_uuid(db, uuid=series.uuid)
     return {'detail': f'Series deleted: {series.title}'}
+
+
+@router.patch('/update/{series_uuid}', response_model_exclude={'created_at'})
+async def update_series(
+    series_in: schemas.SeriesUpdateAdmin,
+    current_user: models.User = Depends(get_current_active_superuser),
+    series: models.Series = Depends(get_series_by_uuid),
+    db: AsyncSession = Depends(get_async_db)
+) -> schemas.Series:
+    if series_in.title is not None and series_in.title != series.title:
+        series_db = await async_crud_series.get_by_title_and_user(
+            db,
+            user_uuid=series.user_uuid,
+            title=series_in.title
+        )
+        if series_db is not None:
+            raise SeriesAlreadyExistsException(
+                detail="This user already has "
+                    f"series with title `{series_in.title}`"
+            )
+
+    series = await async_crud_series.update(
+        db,
+        db_obj=series,
+        obj_in=series_in
+    )
+    return series
