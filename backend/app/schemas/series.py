@@ -51,8 +51,19 @@ class SeriesCreate(SeriesBase):
     )
 
 
-class SeriesUpdate(SeriesBase):
-    pass
+class SeriesUpdate(BaseModel):
+    title: Optional[Title] = None
+    watched_season: Optional[WatchedSeason] = None
+    watched_episode: Optional[WatchedEpisode] = None
+
+
+class SeriesUpdateAdmin(SeriesUpdate):
+    title: Optional[Title] = None
+    watched_season: Optional[WatchedSeason] = None
+    watched_episode: Optional[WatchedEpisode] = None
+    last_season: Optional[LastSeason] = None
+    last_episode: Optional[LastEpisode] = None
+    unwatched_episodes_count: Optional[UnwatchedEpisodesCount] = 0
 
 
 class Series(SeriesBase):
