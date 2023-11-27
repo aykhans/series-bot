@@ -5,11 +5,14 @@ from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import models, schemas
-from app.api.deps import get_async_db, get_current_active_superuser
+from app.api.deps import (
+    get_async_db,
+    get_current_active_superuser,
+    get_series_by_uuid,
+)
 from app.crud import async_crud_series, async_crud_user
 from app.exceptions import (
     SeriesAlreadyExistsException,
-    SeriesNotFoundException,
     UserNotExistsException,
 )
 
@@ -47,14 +50,7 @@ async def create_series(
 
 @router.get('/detail/{series_uuid}')
 async def get_series(
-    series_uuid: UUID4,
     current_user: models.User = Depends(get_current_active_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    series: models.Series = Depends(get_series_by_uuid),
 ) -> schemas.SeriesExtended:
-    series = await async_crud_series.get_by_uuid(db, uuid=series_uuid)
-    if series is None:
-        raise SeriesNotFoundException(
-            detail=f"Series not found: {series_uuid}"
-        )
-
     return series

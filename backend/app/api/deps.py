@@ -3,12 +3,12 @@ from typing import Generator
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
-from pydantic import ValidationError
+from pydantic import UUID4, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import models
 from app.core.config import settings
-from app.crud import async_crud_user
+from app.crud import async_crud_series, async_crud_user
 from app.db.session import AsyncSessionLocal, SessionLocal
 from app.exceptions import (
     InactiveUserException,
@@ -16,6 +16,7 @@ from app.exceptions import (
     NotSuperuserException,
     UserNotFoundException,
 )
+from app.exceptions.series import SeriesNotFoundException
 from app.schemas import JWTPayload
 
 admin_oauth2 = OAuth2PasswordBearer(
@@ -70,3 +71,15 @@ async def get_current_active_superuser(
         raise NotSuperuserException()
 
     return current_user
+
+async def get_series_by_uuid(
+    series_uuid: UUID4,
+    db: AsyncSession = Depends(get_async_db)
+) -> models.Series:
+    series = await async_crud_series.get_by_uuid(db, uuid=series_uuid)
+    if series is None:
+        raise SeriesNotFoundException(
+            detail=f"Series not found: {series_uuid}"
+        )
+
+    return series
