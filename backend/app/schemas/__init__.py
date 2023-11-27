@@ -10,7 +10,7 @@ from .series import (
     SeriesCreate,
     SeriesExtended,
     SeriesUpdate,
-    SeriesUpdateAdmin
+    SeriesUpdateAdmin,
 )
 from .user import (
     EmailResponseAdmin,
