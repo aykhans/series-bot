@@ -24,7 +24,7 @@ async def create_series(
     series: schemas.SeriesCreate,
     user_uuid: Annotated[UUID4, Body()],
     current_user: models.User = Depends(get_current_active_superuser),
-    db: AsyncSession = Depends(get_async_db),
+    db: AsyncSession = Depends(get_async_db)
 ) -> schemas.Series:
     series_db = await async_crud_series.get_by_title_and_user(
         db, user_uuid=user_uuid, title=series.title
@@ -51,6 +51,16 @@ async def create_series(
 @router.get('/detail/{series_uuid}')
 async def get_series(
     current_user: models.User = Depends(get_current_active_superuser),
-    series: models.Series = Depends(get_series_by_uuid),
+    series: models.Series = Depends(get_series_by_uuid)
 ) -> schemas.SeriesExtended:
     return series
+
+
+@router.delete('/delete/{series_uuid}')
+async def delete_series(
+    current_user: models.User = Depends(get_current_active_superuser),
+    series: models.Series = Depends(get_series_by_uuid),
+    db: AsyncSession = Depends(get_async_db)
+) -> dict[str, str]:
+    await async_crud_series.remove_by_uuid(db, uuid=series.uuid)
+    return {'detail': f'Series deleted: {series.title}'}
