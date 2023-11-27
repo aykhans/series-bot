@@ -72,6 +72,16 @@ async def get_current_active_superuser(
 
     return current_user
 
+async def get_user_by_uuid(
+    user_uuid: UUID4,
+    db: AsyncSession = Depends(get_async_db)
+) -> models.User:
+    user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
+    if user is None:
+        raise UserNotFoundException(detail=f"User not found: {user_uuid}")
+
+    return user
+
 async def get_series_by_uuid(
     series_uuid: UUID4,
     db: AsyncSession = Depends(get_async_db)

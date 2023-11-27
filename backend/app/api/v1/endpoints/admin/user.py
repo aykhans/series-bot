@@ -1,13 +1,16 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import models, schemas
-from app.api.deps import get_async_db, get_current_active_superuser
+from app.api.deps import (
+    get_async_db,
+    get_current_active_superuser,
+    get_user_by_uuid,
+)
 from app.crud import async_crud_user
-from app.exceptions import UserAlreadyExistsException, UserNotFoundException
+from app.exceptions import UserAlreadyExistsException
 
 router = APIRouter()
 
@@ -44,43 +47,29 @@ async def create_user(
 
 @router.get('/detail/{user_uuid}')
 async def get_user(
-    user_uuid: UUID4,
     current_user: models.User = Depends(get_current_active_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    user: models.User = Depends(get_user_by_uuid)
 ) -> schemas.UserExtended:
-    user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
-    if user is None:
-        raise UserNotFoundException(detail=f"User not found: {user_uuid}")
-
     return user
 
 
 @router.delete('/delete/{user_uuid}')
 async def delete_user(
-    user_uuid: UUID4,
     current_user: models.User = Depends(get_current_active_superuser),
-    db: AsyncSession = Depends(get_async_db),
+    user: models.User = Depends(get_user_by_uuid),
+    db: AsyncSession = Depends(get_async_db)
 ) -> dict[str, str]:
-    user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
-    if user is None:
-        raise UserNotFoundException(detail=f"User not found: {user_uuid}")
-
-    user = await async_crud_user.remove_by_uuid(db, uuid=user_uuid)
-
+    user = await async_crud_user.remove_by_uuid(db, uuid=user.uuid)
     return {'detail': f'User deleted: {user.username}'}
 
 
 @router.patch('/update/{user_uuid}')
 async def update_user(
-    user_uuid: UUID4,
     user_in: schemas.UserUpdateAdmin,
     current_user: models.User = Depends(get_current_active_superuser),
-    db: AsyncSession = Depends(get_async_db),
+    user: models.User = Depends(get_user_by_uuid),
+    db: AsyncSession = Depends(get_async_db)
 ) -> schemas.UserExtended:
-    user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
-    if user is None:
-        raise UserNotFoundException(detail=f"User not found: {user_uuid}")
-
     user = await async_crud_user.update(db, db_obj=user, obj_in=user_in)
     return user
 
