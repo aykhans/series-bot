@@ -23,3 +23,16 @@ or in container
 ```bash
 poetry run python3 app/commands/command.py user create
 ```
+
+## Create and upgrade migrations with alembic
+```bash
+docker exec -it {backend_container_id} poetry run alembic revision --autogenerate -m "migration_name"
+docker exec -it {backend_container_id} poetry run alembic upgrade head
+```
+
+or in container
+
+```bash
+poetry run alembic revision --autogenerate -m "migration_name"
+poetry run alembic upgrade head
+```
