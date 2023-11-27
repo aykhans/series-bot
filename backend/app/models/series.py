@@ -6,7 +6,7 @@ from app.db.base_class import Base
 class Series(Base):
     user_uuid = Column(
         UUID,
-        ForeignKey("user.uuid"),
+        ForeignKey("user.uuid", ondelete="CASCADE"),
         nullable=False
     )
     title = Column(String(255), nullable=False)
