@@ -1,12 +1,12 @@
 from typing import Optional
 
 from pydantic import UUID4
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.crud.base import AsyncCRUDBase
-from app.models import Series
+from app.models import Series, User
 from app.schemas import SeriesCreate, SeriesFilterAdmin, SeriesUpdate
 
 
@@ -27,6 +27,14 @@ class AsyncCRUDSeries(AsyncCRUDBase[Series, SeriesCreate, SeriesUpdate]):
         if series_filter.created_at_end is not None:
             filters.append(
                 self.model.created_at <= series_filter.created_at_end
+            )
+        if series_filter.username is not None:
+            filters.append(
+                User.username.ilike(f"%{series_filter.username}%")
+            )
+        if series_filter.email is not None:
+            filters.append(
+                User.email.ilike(f"%{series_filter.email}%")
             )
         return filters
 
@@ -81,9 +89,11 @@ class AsyncCRUDSeries(AsyncCRUDBase[Series, SeriesCreate, SeriesUpdate]):
         *,
         skip: int = 0,
         limit: int = 30,
-        filters: Optional[str] = None
+        filters: Optional[SeriesFilterAdmin] = None
     ) -> list[Series]:
-        q = select(self.model).options(joinedload(self.model.user))
+        q = select(self.model).join(self.model.user).options(
+            selectinload(self.model.user)
+        )
         if filters is not None:
             q = q.where(*await self._get_filters(filters))
         q = (
@@ -95,5 +105,14 @@ class AsyncCRUDSeries(AsyncCRUDBase[Series, SeriesCreate, SeriesUpdate]):
 
         obj = await db.execute(q)
         return obj.scalars()
+
+    async def get_count(
+        self, db: AsyncSession, *, filters: Optional[SeriesFilterAdmin] = None
+    ) -> int:
+        q = select(func.count(self.model.uuid)).join(self.model.user)
+        if filters is not None:
+            q = q.where(*await self._get_filters(filters))
+        obj = await db.execute(q)
+        return obj.scalar_one()
 
 async_series = AsyncCRUDSeries(Series)
