@@ -52,7 +52,7 @@ async def create_series(
 async def get_series(
     current_user: models.User = Depends(get_current_active_superuser),
     series: models.Series = Depends(get_series_by_uuid)
-) -> schemas.SeriesExtended:
+) -> schemas.SeriesUser:
     return series
 
 
@@ -91,3 +91,27 @@ async def update_series(
         obj_in=series_in
     )
     return series
+
+
+@router.get('/all')
+async def get_all_series(
+    current_user: models.User = Depends(get_current_active_superuser),
+    pagination: schemas.SeriesPagination = Depends(),
+    series_filter: schemas.SeriesFilterAdmin = Depends(),
+    db: AsyncSession = Depends(get_async_db)
+) -> schemas.SeriesListAdmin:
+    series = await async_crud_series.get_multi(
+        db,
+        skip=pagination.skip,
+        limit=pagination.page_size,
+        filters=series_filter
+    )
+    count = await async_crud_series.get_count(
+        db,
+        filters=series_filter
+    )
+
+    return schemas.SeriesListAdmin(
+        series=series,
+        pagination=schemas.Pagination(total=count, page=pagination.page)
+    )
