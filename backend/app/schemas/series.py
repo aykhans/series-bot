@@ -99,5 +99,7 @@ class SeriesListAdmin(BaseModel):
 
 class SeriesFilterAdmin(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=255)
+    username: Optional[str] = Field(None, min_length=1, max_length=35)
+    email: Optional[str] = Field(None, min_length=1, max_length=72)
     created_at_start: Optional[PastDate] = None
     created_at_end: Optional[PastDate] = None
