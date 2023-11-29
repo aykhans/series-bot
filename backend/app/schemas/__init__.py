@@ -4,15 +4,15 @@ from .notification_settings import (
     NotificationSettingsCreate,
     NotificationSettingsUpdate,
 )
-from .pagination import Pagination, UserPagination, SeriesPagination
+from .pagination import Pagination, SeriesPagination, UserPagination
 from .series import (
     Series,
     SeriesCreate,
-    SeriesUser,
+    SeriesFilterAdmin,
+    SeriesListAdmin,
     SeriesUpdate,
     SeriesUpdateAdmin,
-    SeriesListAdmin,
-    SeriesFilterAdmin,
+    SeriesUser,
 )
 from .user import (
     EmailResponseAdmin,

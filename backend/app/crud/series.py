@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pydantic import UUID4
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,7 +7,7 @@ from sqlalchemy.orm import joinedload
 
 from app.crud.base import AsyncCRUDBase
 from app.models import Series
-from app.schemas import SeriesCreate, SeriesUpdate, SeriesFilterAdmin
+from app.schemas import SeriesCreate, SeriesFilterAdmin, SeriesUpdate
 
 
 class AsyncCRUDSeries(AsyncCRUDBase[Series, SeriesCreate, SeriesUpdate]):
