@@ -91,7 +91,7 @@ async def get_all_users(
 
     return schemas.UserListAdmin(
         users=await users,
-        pagination=schemas.Pagination(total=await count)
+        pagination=schemas.Pagination(total=await count, page=pagination.page)
     )
 
 
