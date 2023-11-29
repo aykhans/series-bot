@@ -50,7 +50,7 @@ class AsyncCRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db: AsyncSession,
         *,
         skip: int = 0,
-        limit: int = 100,
+        limit: int = 30,
         filters: Optional[FilterSchemaType] = None
     ) -> list[ModelType]:
         q = select(self.model)
