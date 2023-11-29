@@ -1,7 +1,7 @@
 from typing import Optional
 
 from pydantic import UUID4
-from sqlalchemy import and_, select, func
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
