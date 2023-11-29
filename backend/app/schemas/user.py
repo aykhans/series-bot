@@ -1,6 +1,6 @@
 from typing import Annotated, Optional
 
-from pydantic import BaseModel, EmailStr, Field, PastDatetime
+from pydantic import BaseModel, EmailStr, Field
 
 from app.schemas import base, pagination
 from app.schemas import notification_settings as notification_schemas
@@ -102,8 +102,8 @@ class UserFilterAdmin(BaseModel):
     is_email_verified: Optional[IsEmailVerified] = None
     is_active: Optional[IsActive] = None
     is_superuser: Optional[IsSuperuser] = None
-    created_at_start: Optional[PastDatetime] = None
-    created_at_end: Optional[PastDatetime] = None
+    created_at_start: Optional[base.CreatedAt] = None
+    created_at_end: Optional[base.CreatedAt] = None
 
 
 class UsernameResponseAdmin(BaseModel):
