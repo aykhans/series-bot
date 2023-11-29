@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import UUID4
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -5,10 +6,29 @@ from sqlalchemy.orm import joinedload
 
 from app.crud.base import AsyncCRUDBase
 from app.models import Series
-from app.schemas import SeriesCreate, SeriesUpdate
+from app.schemas import SeriesCreate, SeriesUpdate, SeriesFilterAdmin
 
 
 class AsyncCRUDSeries(AsyncCRUDBase[Series, SeriesCreate, SeriesUpdate]):
+    async def _get_filters(
+        self,
+        series_filter: SeriesFilterAdmin
+    ) -> list:
+        filters = []
+        if series_filter.title is not None:
+            filters.append(
+                self.model.title.ilike(f"%{series_filter.title}%")
+            )
+        if series_filter.created_at_start is not None:
+            filters.append(
+                self.model.created_at >= series_filter.created_at_start
+            )
+        if series_filter.created_at_end is not None:
+            filters.append(
+                self.model.created_at <= series_filter.created_at_end
+            )
+        return filters
+
     async def get_by_title_and_user(
         self,
         db: AsyncSession,
@@ -53,5 +73,26 @@ class AsyncCRUDSeries(AsyncCRUDBase[Series, SeriesCreate, SeriesUpdate]):
         )
         obj = await db.execute(q)
         return obj.scalar_one_or_none()
+
+    async def get_multi(
+        self,
+        db: AsyncSession,
+        *,
+        skip: int = 0,
+        limit: int = 30,
+        filters: Optional[str] = None
+    ) -> list[Series]:
+        q = select(self.model).options(joinedload(self.model.user))
+        if filters is not None:
+            q = q.where(*await self._get_filters(filters))
+        q = (
+            q.
+            offset(skip).
+            limit(limit).
+            order_by(self.model.created_at.desc())
+        )
+
+        obj = await db.execute(q)
+        return obj.scalars()
 
 async_series = AsyncCRUDSeries(Series)
