@@ -17,7 +17,7 @@ Total = Annotated[
 
 
 class PaginationBase(BaseModel):
-    page_size: Optional[PageSize] = 30
+    page_size: Optional[PageSize] = Field(30, gt=0, lt=50)
     page: Optional[Page] = 1
 
     @property
@@ -26,8 +26,13 @@ class PaginationBase(BaseModel):
 
 
 class UserPagination(PaginationBase):
+    ...
+
+
+class SeriesPagination(PaginationBase):
     page_size: Optional[PageSize] = Field(30, gt=0, lt=50)
 
 
 class Pagination(BaseModel):
     total: Total
+    page: Page

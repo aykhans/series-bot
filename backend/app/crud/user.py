@@ -78,7 +78,8 @@ class AsyncCRUDUser(AsyncCRUDBase[User, UserCreate, UserUpdate]):
             await async_crud_notification_settings.update(
                 db,
                 db_obj=db_obj.notification_settings,
-                obj_in=obj_in.notification_settings
+                obj_in=obj_in.notification_settings,
+                commit=False
             )
             del update_data['notification_settings']
 

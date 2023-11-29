@@ -22,7 +22,9 @@ class User(Base):
     )
     series = relationship(
         'Series',
-        backref="user"
+        backref="user",
+        passive_deletes=True,
+        cascade='all,delete'
     )
 
     def __init__(self, *args, **kwargs) -> None:

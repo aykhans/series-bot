@@ -1,8 +1,8 @@
 from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PastDate
 
-from app.schemas import base
+from app.schemas import base, pagination
 from app.schemas import user as user_schemas
 
 Title = Annotated[
@@ -51,8 +51,19 @@ class SeriesCreate(SeriesBase):
     )
 
 
-class SeriesUpdate(SeriesBase):
-    pass
+class SeriesUpdate(BaseModel):
+    title: Optional[Title] = None
+    watched_season: Optional[WatchedSeason] = None
+    watched_episode: Optional[WatchedEpisode] = None
+
+
+class SeriesUpdateAdmin(SeriesUpdate):
+    title: Optional[Title] = None
+    watched_season: Optional[WatchedSeason] = None
+    watched_episode: Optional[WatchedEpisode] = None
+    last_season: Optional[LastSeason] = None
+    last_episode: Optional[LastEpisode] = None
+    unwatched_episodes_count: Optional[UnwatchedEpisodesCount] = 0
 
 
 class Series(SeriesBase):
@@ -62,5 +73,33 @@ class Series(SeriesBase):
     class Config:
         from_attributes = True
 
-class SeriesExtended(Series):
+
+class SeriesUser(Series):
     user: Optional[user_schemas.UserInSeries] = None
+
+
+class SeriesReduced(BaseModel):
+    title: Optional[Title] = None
+    unwatched_episodes_count: Optional[UnwatchedEpisodesCount] = 0
+    created_at: Optional[base.CreatedAt] = None
+    uuid: Optional[base.UUID4] = None
+
+    class Config:
+        from_attributes = True
+
+
+class SeriesUserReduced(SeriesReduced):
+    user: Optional[user_schemas.UserInSeries] = None
+
+
+class SeriesListAdmin(BaseModel):
+    series: list[SeriesUserReduced]
+    pagination: pagination.Pagination
+
+
+class SeriesFilterAdmin(BaseModel):
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    username: Optional[str] = Field(None, min_length=1, max_length=35)
+    email: Optional[str] = Field(None, min_length=1, max_length=72)
+    created_at_start: Optional[PastDate] = None
+    created_at_end: Optional[PastDate] = None
