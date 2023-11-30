@@ -1,6 +1,6 @@
 from typing import Generator
 
-from fastapi import Depends
+from fastapi import Body, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from pydantic import UUID4, ValidationError
@@ -74,6 +74,16 @@ async def get_current_active_superuser(
 
 async def get_user_by_uuid(
     user_uuid: UUID4,
+    db: AsyncSession = Depends(get_async_db)
+) -> models.User:
+    user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
+    if user is None:
+        raise UserNotFoundException(detail=f"User not found: {user_uuid}")
+
+    return user
+
+async def get_user_by_uuid_in_body(
+    user_uuid: UUID4 = Body(),
     db: AsyncSession = Depends(get_async_db)
 ) -> models.User:
     user = await async_crud_user.get_by_uuid(db, uuid=user_uuid)
