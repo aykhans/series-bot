@@ -1,4 +1,11 @@
-from sqlalchemy import UUID, Column, ForeignKey, SmallInteger, String, UniqueConstraint
+from sqlalchemy import (
+    UUID,
+    Column,
+    ForeignKey,
+    SmallInteger,
+    String,
+    UniqueConstraint,
+)
 
 from app.db.base_class import Base
 

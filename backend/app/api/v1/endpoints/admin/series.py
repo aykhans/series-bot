@@ -6,7 +6,7 @@ from app.api.deps import (
     get_async_db,
     get_current_active_superuser,
     get_series_by_uuid,
-    get_user_by_uuid_in_body
+    get_user_by_uuid_in_body,
 )
 from app.crud import async_crud_series
 from app.exceptions import SeriesAlreadyExistsException
