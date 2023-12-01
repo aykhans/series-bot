@@ -1,4 +1,11 @@
-from sqlalchemy import UUID, Column, ForeignKey, SmallInteger, String
+from sqlalchemy import (
+    UUID,
+    Column,
+    ForeignKey,
+    SmallInteger,
+    String,
+    UniqueConstraint,
+)
 
 from app.db.base_class import Base
 
@@ -18,4 +25,8 @@ class Series(Base):
         SmallInteger(),
         nullable=False,
         default=0
+    )
+
+    __table_args__ = (
+        UniqueConstraint('user_uuid', 'title', name='uq_user_title'),
     )

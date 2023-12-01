@@ -4,4 +4,4 @@ docker compose up -d
 ```
 
 ## TODO (backend):
-* Add unique title validation to 'Series' model
+<del>* Add unique title validation to 'Series' model
