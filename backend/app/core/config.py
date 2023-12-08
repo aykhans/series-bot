@@ -4,6 +4,26 @@ from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
 
 
+class Postgres(BaseSettings):
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_SERVER: str
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str
+
+    def get_postgres_dsn(self, _async: bool = False) -> PostgresDsn:
+        scheme = 'postgresql+asyncpg' if _async else 'postgresql'
+
+        return PostgresDsn.build(
+            scheme=scheme,
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_SERVER,
+            port=self.POSTGRES_PORT,
+            path=self.POSTGRES_DB
+        )
+
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = 'Series Robot V2'
 
@@ -22,23 +42,6 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 days
     JWT_ALGORITHM: str = 'HS256'
 
-    # Postgres
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_SERVER: str
-    POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str
-
-    def get_postgres_dsn(self, _async: bool = False) -> PostgresDsn:
-        scheme = 'postgresql+asyncpg' if _async else 'postgresql'
-
-        return PostgresDsn.build(
-            scheme=scheme,
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_SERVER,
-            port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB
-        )
+    POSTGRES: Postgres = Postgres()
 
 settings = Settings()

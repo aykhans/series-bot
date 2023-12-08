@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import settings
 
 engine: Engine = create_engine(
-    str(settings.get_postgres_dsn()),
+    str(settings.POSTGRES.get_postgres_dsn()),
     pool_pre_ping=True
 )
 
@@ -21,7 +21,7 @@ SessionLocal: Session = sessionmaker(
 
 
 async_engine: AsyncEngine = create_async_engine(
-    str(settings.get_postgres_dsn(_async=True)),
+    str(settings.POSTGRES.get_postgres_dsn(_async=True)),
     future=True
 )
 
