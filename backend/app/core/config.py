@@ -4,6 +4,13 @@ from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
 
 
+class CORSSettings(BaseSettings):
+    ALLOW_ORIGINS: list = ['*']
+    ALLOW_CREDENTIALS: bool = True
+    ALLOW_METHODS: list = ['*']
+    ALLOW_HEADERS: list = ['*']
+
+
 class Postgres(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
@@ -29,6 +36,8 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
     DEBUG: bool = True
+
+    CORS: CORSSettings = CORSSettings()
 
     MAIN_PATH: Path = Path(__file__).resolve().parent.parent.parent
     APP_PATH: Path = Path(__file__).resolve().parent.parent
