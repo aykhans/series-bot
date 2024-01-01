@@ -8,13 +8,13 @@ services:
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     env_file:
-      - ./config/postgresql/.env
+      - ./config/postgresql/.env.prod
 
   backend:
     build: ./backend/
     env_file:
-      - ./config/postgresql/.env
-      - ./backend/config/.env
+      - ./config/postgresql/.env.prod
+      - ./backend/config/.env.prod
     ports:
       - 8000:8000
     depends_on:
@@ -30,7 +30,7 @@ services:
     ports:
       - 80:80
     volumes:
-      - ./config/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./config/nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
 

@@ -4,25 +4,14 @@ from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
 
 
-class Settings(BaseSettings):
-    PROJECT_NAME: str = 'Series Robot V2'
+class CORSSettings(BaseSettings):
+    ALLOW_ORIGINS: list = ['*']
+    ALLOW_CREDENTIALS: bool = True
+    ALLOW_METHODS: list = ['*']
+    ALLOW_HEADERS: list = ['*']
 
-    SECRET_KEY: str
-    DEBUG: bool = True
 
-    MAIN_PATH: Path = Path(__file__).resolve().parent.parent.parent
-    APP_PATH: Path = Path(__file__).resolve().parent.parent
-
-    API_V1_STR: str = '/api/v1'
-
-    @property
-    def ADMIN_STR(self) -> str:
-        return self.SECRET_KEY[-10:]
-
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 days
-    JWT_ALGORITHM: str = 'HS256'
-
-    # Postgres
+class Postgres(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_SERVER: str
@@ -40,5 +29,28 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB
         )
+
+
+class Settings(BaseSettings):
+    PROJECT_NAME: str = 'Series Robot V2'
+
+    SECRET_KEY: str
+    DEBUG: bool = True
+
+    CORS: CORSSettings = CORSSettings()
+
+    MAIN_PATH: Path = Path(__file__).resolve().parent.parent.parent
+    APP_PATH: Path = Path(__file__).resolve().parent.parent
+
+    API_V1_STR: str = '/api/v1'
+
+    @property
+    def ADMIN_STR(self) -> str:
+        return self.SECRET_KEY[-10:]
+
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 days
+    JWT_ALGORITHM: str = 'HS256'
+
+    POSTGRES: Postgres = Postgres()
 
 settings = Settings()

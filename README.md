@@ -1,7 +1,10 @@
-## Run all services
+## Run in dev
 ```bash
-docker compose up -d
+docker compose -f docker-compose-dev.yml up -d
 ```
+
+## TODO
+* Add healthcheck to docker compose
 
 ## TODO (backend):
 <del>* Add unique title validation to 'Series' model

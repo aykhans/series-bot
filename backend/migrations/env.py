@@ -30,7 +30,7 @@ from app.models import User, NotificationSettings, Series
 
 config.set_main_option(
     'sqlalchemy.url',
-    str(settings.get_postgres_dsn(_async=True))
+    str(settings.POSTGRES.get_postgres_dsn(_async=True))
 )
 
 target_metadata = Base.metadata
