@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 from app.api.v1.api import api_router
 from app.core.config import settings
@@ -22,5 +24,17 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 # Exception handlers
 
 @app.exception_handler(ValidationError)
-async def validation_exception_handler(request, exc):
+async def validation_exception_handler(
+    request: Request, exc: ValidationError
+):
     return await request_validation_exception_handler(request, exc)
+
+@app.exception_handler(IntegrityError)
+async def integrity_error_handler(request: Request, exc: IntegrityError):
+    if exc.orig.pgcode == "23505": # Unique violation
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={"detail": "An error occurred, please try again."}
+        )
+
+    raise exc

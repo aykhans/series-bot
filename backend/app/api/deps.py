@@ -4,6 +4,7 @@ from fastapi import Body, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from pydantic import UUID4, ValidationError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import models
@@ -25,13 +26,27 @@ admin_oauth2 = OAuth2PasswordBearer(
 
 
 def get_db() -> Generator:
-    with SessionLocal() as db:
-        yield db
+    try:
+        with SessionLocal() as db:
+            yield db
+    except IntegrityError as IntExc:
+        try:
+            db.rollback()
+        except NameError: ...
+        finally:
+            raise IntExc
 
 
 async def get_async_db() -> Generator:
-    async with AsyncSessionLocal() as async_db:
-        yield async_db
+    try:
+        async with AsyncSessionLocal() as async_db:
+            yield async_db
+    except IntegrityError as IntExc:
+        try:
+            async_db.rollback()
+        except NameError: ...
+        finally:
+            raise IntExc
 
 
 async def get_current_user(
