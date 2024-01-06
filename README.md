@@ -15,8 +15,8 @@ docker run \
   -p 5432:5432 \
   -v series_bot_postgresql_data:/var/lib/postgresql/data \
   --env-file ./.env.dev \
-  --init \
   --network series-bot \
+  --init \
   postgres:16.1-alpine
 ```
 
@@ -31,6 +31,7 @@ docker run \
   -p 8000:8000 \
   -v ./backend:/backend \
   --network series-bot \
+  --init \
   series-bot-backend:1.1
 ```
 
@@ -41,6 +42,7 @@ docker run \
   -p 80:80 \
   -v ./config/nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf \
   --network series-bot \
+  --init \
   nginx:1.25.3-alpine
 ```
 
