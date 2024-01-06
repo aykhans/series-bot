@@ -1,16 +1,20 @@
 version: "3.9"
 
 services:
-  postgresql:
-    image: postgres:16.0-bookworm
+  series-bot-postgresql:
+    container_name: "series-bot-postgresql"
+    image: postgres:16.1-alpine
     ports:
       - 5432:5432
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
+      - series_bot_postgresql_data:/var/lib/postgresql/data
     env_file:
       - ./config/postgresql/.env.dev
+    init: true
 
-  backend:
+  series-bot-backend:
+    container_name: "series-bot-backend"
+    image: series-bot-backend:1.1
     build: ./backend/
     env_file:
       - ./config/postgresql/.env.dev
@@ -18,21 +22,21 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - postgresql
+      - series-bot-postgresql
     volumes:
       - ./backend:/backend
-    command: >
-      bash -c "poetry run alembic upgrade head
-      && poetry run uvicorn --reload --host=0.0.0.0 --port=8000 app.main:app"
+    init: true
 
-  nginx:
-    image: nginx:1.25-bookworm
+  series-bot-nginx:
+    container_name: "series-bot-nginx"
+    image: nginx:1.25.3-alpine
     ports:
       - 80:80
     volumes:
       - ./config/nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - backend
+      - series-bot-backend
+    init: true
 
 volumes:
-  postgresql_data:
+  series_bot_postgresql_data:
