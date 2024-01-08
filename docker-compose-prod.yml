@@ -4,8 +4,6 @@ services:
   series-bot-postgresql:
     container_name: "series-bot-postgresql"
     image: postgres:16.1-alpine
-    ports:
-      - 5432:5432
     volumes:
       - series_bot_postgresql_data:/var/lib/postgresql/data
     env_file:
@@ -19,8 +17,6 @@ services:
     env_file:
       - ./config/postgresql/.env.prod
       - ./backend/config/.env.prod
-    ports:
-      - 8000:8000
     depends_on:
       - series-bot-postgresql
     volumes:
